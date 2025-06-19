@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Create Admin Account</h2>
+<form method="post" class="card p-4 shadow-sm">
+  <div class="mb-3">
+    <input name="username" placeholder="Username" class="form-control">
+  </div>
+  <div class="mb-3">
+    <input name="password" id="password" type="password" placeholder="Password" class="form-control">
+    <ul class="form-text small">
+      <li id="length">8+ characters</li>
+      <li id="upper">1 uppercase letter</li>
+      <li id="lower">1 lowercase letter</li>
+      <li id="digit">1 digit</li>
+      <li id="symbol">1 special symbol</li>
+    </ul>
+  </div>
+  <button class="btn btn-primary w-100">Create Admin</button>
+</form>
+<script>
+const pwd = document.getElementById("password");
+const checks = {
+  length:  document.getElementById("length"),
+  upper:   document.getElementById("upper"),
+  lower:   document.getElementById("lower"),
+  digit:   document.getElementById("digit"),
+  symbol:  document.getElementById("symbol"),
+};
+
+pwd.addEventListener("input", () => {
+  const v = pwd.value;
+  checks.length.style.color  = v.length >= 8 ? "green" : "";
+  checks.upper.style.color   = /[A-Z]/.test(v) ? "green" : "";
+  checks.lower.style.color   = /[a-z]/.test(v) ? "green" : "";
+  checks.digit.style.color   = /\d/.test(v) ? "green" : "";
+  checks.symbol.style.color  = /[!@#$%^&*(),.?":{}|<>]/.test(v) ? "green" : "";
+});
+</script>
+{% endblock %}

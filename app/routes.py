@@ -28,7 +28,7 @@ def sanitize_printer_name(raw_name):
 def root():
     printers = get_printers()
     jobs = get_all_jobs()
-    return render_template("index.html", printers=printers)
+    return render_template("index.html", printers=printers, jobs=jobs)
 
 @views.route('/onboard/user', methods=['GET', 'POST'])
 def onboard_user():

@@ -118,26 +118,28 @@ def get_user_by_id(user_id):
     return None
 
 def refresh_all_job_statuses():
-    # Step 1: Fetch all jobs that are not marked as completed or failed
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT filename, printer_id, job_id, status FROM jobs WHERE status NOT IN ('completed', 'failed')")
     pending_jobs = c.fetchall()
     conn.close()
 
-    # Step 2: Fetch all jobs from CUPS
     cups_conn = cups.Connection()
-    active_jobs = cups_conn.getJobs(my_jobs=True, which_jobs='all')
+    active_jobs = cups_conn.getJobs(
+        my_jobs=True,
+        which_jobs='all',
+        requested_attributes=['job-id', 'job-state', 'job-name', 'printer-uri']
+    )
 
-    # Step 3: Loop over each pending job from DB
     for filename, printer_name, job_id, current_status in pending_jobs:
-        # Try to find this job in CUPS
-        matching_job = next((job for job in active_jobs.values() if job['job_id'] == job_id), None)
+        matching_job = next(
+            (job for job in active_jobs.values() if 'job-id' in job and job['job-id'] == job_id),
+            None
+        )
 
         if matching_job:
-            # Map job-state number to string
-            state_code = matching_job['job-state']
-            job_state_map = {
+            state_code = matching_job.get('job-state', -1)
+            state_map = {
                 3: 'pending',
                 4: 'held',
                 5: 'processing',
@@ -146,11 +148,9 @@ def refresh_all_job_statuses():
                 8: 'aborted',
                 9: 'completed'
             }
-            new_status = job_state_map.get(state_code, 'unknown')
+            new_status = state_map.get(state_code, 'unknown')
         else:
-            # Not in CUPS anymore – assume completed
             new_status = 'completed'
 
-        # Only update if the status has changed
         if new_status != current_status:
             update_job(filename, printer_name, job_id, new_status)

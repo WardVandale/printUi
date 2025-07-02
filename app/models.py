@@ -132,7 +132,7 @@ def refresh_all_job_statuses():
     # Step 3: Loop over each pending job from DB
     for filename, printer_name, job_id, current_status in pending_jobs:
         # Try to find this job in CUPS
-        matching_job = next((job for job in active_jobs.values() if job['job-id'] == job_id), None)
+        matching_job = next((job for job in active_jobs.values() if job['job_id'] == job_id), None)
 
         if matching_job:
             # Map job-state number to string
